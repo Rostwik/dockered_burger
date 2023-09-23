@@ -13,6 +13,90 @@
 
 Третий интерфейс — это админка. Преимущественно им пользуются программисты при разработке сайта. Также сюда заходит менеджер, чтобы обновить меню ресторанов Star Burger.
 
+## Docker
+
+### Dev версия
+
+- Скачайте код:
+```sh
+https://github.com/Rostwik/dockered_burger.git
+```
+
+- Перейдите в каталог проекта:
+```sh
+cd dockered_burger
+```
+
+- [Установите Docker](https://docs.docker.com/engine/install/).
+
+Проверьте, что `docker` и `docker compose` установлены:
+```sh
+$ docker --version
+$ docker compose version
+```
+
+- Соберите Docker образы:
+```sh
+docker compose build
+```
+Создайте файл `.env` со следующими настройками:
+
+- `DEBUG` — дебаг-режим. Поставьте `False`.
+- `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
+- `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
+- `YANDEX_API` - ключ для API Yandex [Инструкция для получения](https://yandex.ru/dev/site/api/concepts/access.html)
+- `ROLLBAR_ACCESS_TOKEN` - токен для Rollbar [Инструкция для получения](https://rollbar.com/) (опционально)
+- `ROLLBAR_ENVIRONMENT` - имя профиля Rollbar
+- `DATABASE_URL` - url для подключения к БД, пример: "postgres://USER:PASSWORD@HOST:PORT/NAME"
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - имя пользователя и пароль для авторизации в БД, имя БД
+
+- Запустите контейнеры для фронтенда, бэкэнда и базы данных:
+```sh
+docker compose up -d
+```
+
+- Соберите статику бэкенда, проведите миграции и создайте суперпользователя:
+
+```sh
+docker compose exec -it backend python manage.py collectstatic --noinput
+docker compose exec -it backend python manage.py migrate
+docker compose exec -it backend python manage.py createsuperuser
+```
+
+- Заполните в админке сайта, категории, товары и рестораны
+
+
+### Prod версия
+
+- Установите на сервере:
+    - [Git](https://github.com/git-guides/install-git)
+    - [Docker и Docker Compose](https://docs.docker.com/engine/install/)
+
+- Склонируйте проект на свой сервер:
+```sh
+cd /opt/
+git clone https://github.com/Rostwik/dockered_burger.git
+```
+
+Перейдите в каталог `Production`. Создайте файл `.env` со следующими настройками:
+
+- `DEBUG` — дебаг-режим. Поставьте `False`.
+- `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
+- `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
+- `YANDEX_API` - ключ для API Yandex [Инструкция для получения](https://yandex.ru/dev/site/api/concepts/access.html)
+- `ROLLBAR_ACCESS_TOKEN` - токен для Rollbar [Инструкция для получения](https://rollbar.com/) (опционально)
+- `ROLLBAR_ENVIRONMENT` - имя профиля Rollbar
+- `DATABASE_URL` - url для подключения к БД, пример: "postgres://USER:PASSWORD@HOST:PORT/NAME"
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - имя пользователя и пароль для авторизации в БД, имя БД
+
+- Установите nginx на сервер и сконфигурируйте его
+- Соберите докер образы фронтенда, бэкэнда и базы данных
+- Запустите скрипт:
+```sh
+cd /opt/dockered_burger/Production
+./deploy_star_burger.sh
+```
+
 ## Как запустить dev-версию сайта
 
 Для запуска сайта нужно запустить **одновременно** бэкенд и фронтенд, в двух терминалах.
